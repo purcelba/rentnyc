@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+  <h2>Search results: {{n_results}} listings</h2>
+  <p>Click listing ID for expected unit price:</p>
+  <form action="results" method="POST">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Listing ID</th>
+          <th>Address</th>
+          <th>Neighborhood</th>
+          <th>Borough</th>
+          <th>Price</th>
+          <th>Square feet</th>
+          <th>Beds</th>
+          <th>Baths</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for key,value in df.iterrows() %}
+          <tr>
+            <td>
+              <input type="submit" name="listing_id"value="{{value['data_id']}}">
+            </td>
+            <td>{{value['address']}}</td>
+            <td>{{value['neighborhood']}}</td>
+            <td>{{value['borough']}}</td>
+            <td>{{value['price']}}</td>
+            <td>{{value['sq_ft']}}</td>
+            <td>{{value['beds']}}</td>
+            <td>{{value['baths']}}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </form>
+</div>
+{% endblock %}

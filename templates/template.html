@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="starter-template">
+    <!--Title and slogan-->
+    <h1>RentNYC!</h1>
+    <p class="lead">Model-based evaluation of NYC rental prices. </p>
+    <!-- Search form -->
+    <form action="table" method="POST">
+      <label>Min Price:</label>
+        <select name="min_price">
+          <option value="Any">Any</option>
+          <option value="500">$500</option>
+          <option value="1000">$1000</option>
+          <option value="1500">$1500</option>
+          <option value="2000">$2000</option>
+          <option value="2500">$2500</option>
+          <option value="5000">$5000</option>
+          <option value="7500">$7500</option>
+          <option value="10000">$10000</option>
+          <option value="20000">$20000</option>
+        </select>
+      <label>Max Price:</label>
+        <select name="max_price">
+          <option value="Any">Any</option>
+          <option value="500">$500</option>
+          <option value="1000">$1000</option>
+          <option value="1500">$1500</option>
+          <option value="2000">$2000</option>
+          <option value="2500">$2500</option>
+          <option value="5000">$5000</option>
+          <option value="7500">$7500</option>
+          <option value="10000">$10000</option>
+          <option value="20000">$20000</option>
+        </select><br>
+      <label>Borough:</label>
+        <select name="borough">
+          <option value="Any">Any</option>
+          <option value="Manhattan">Manhattan</option>
+          <option value="Bronx">Bronx</option>
+          <option value="Brooklyn">Brooklyn</option>
+          <option value="Queens">Queens</option>
+          <option value="Staten Island">Staten Island</option>
+        </select>
+      <label>Beds:</label>
+        <select name="beds">
+          <option value="Any">Any</option>
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value=">3">&gt;3</option>
+        </select>
+      <label>Baths:</label>
+        <select name="baths">
+          <option value="Any">Any</option>
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value=">3">&gt;3</option>
+        </select><br>
+      <label>Sort by:</label>
+        <select name="sortby">
+          <option value="price">Price</option>
+          <option value="borough">Borough</option>
+          <option value="sq_ft">Square feet</option>
+          <option value="beds">Beds</option>
+          <option value="baths">Baths</option>
+          <option value="neighborhood">Neighborhood</option>
+        </select><br><br>
+      <input type="submit" name ="url_form" value="SEARCH">
+    </form>
+    <!--Introductory paragraph-->
+    <h4>
+      <br>
+      RentNYC provides easy assessments of NYC rental unit prices<br>
+       based on size, location, amenities, and nearby public transportation. <br>
+      Please check out <a href="https://purcelba.github.io/rentapp/">my blog post</a> to learn more about the data set and model.
+    </h4>
+  </div>
+{% endblock %}

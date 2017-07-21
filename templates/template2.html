@@ -1,0 +1,152 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <!--Add text-->
+    <div class="container" style="position: absolute; top: 150px; left:500px; width: 500px; height: 150px;">
+        <!--Display listing info-->
+        <h2>{{listing_info['address']}}</h2>
+        <h5>
+            {% if listing_info['beds'] != '-' %} {{listing_info['beds']}} beds  {% endif %}
+            {% if listing_info['baths'] != '-' %} | {{listing_info['baths']}} baths {% endif %}
+            {% if listing_info['sq_ft'] != '-' %} | {{listing_info['sq_ft']}} ft<sup>2</sup> {% endif %}
+        </h5>
+        <h5>{{listing_info['neighborhood']}} | {{listing_info['borough']}}</h5>
+
+        <!--Display results-->
+        <div class="container" style="position: relative; width: 500px; height: 100px;">
+            <h4>
+                Actual price: ${{listing_info['price']}}  (line) <br>
+                Expected price: ${{mean_pred}} (circle) <br>
+                Margin of error: ${{ci_low}} to ${{ci_high}} (shading)<br>
+            </h4>
+        </div>
+
+        <!--Describe results-->
+        <div class="container" style="position: relative; width: 500px; height: 100px;">
+            <h3>
+                {% if listing_info['price'] > ci_high %}
+                    The price is above the expected range.  The model is confident that this unit is overpriced.
+                {% elif listing_info['price'] > mean_pred and listing_info['price'] <= ci_high %}
+                    The price is slightly high, but falls within the expected range.
+                {% elif listing_info['price'] == mean_pred %}
+                    The price is exactly as expected.
+                {% elif listing_info['price'] < mean_pred and listing_info['price'] >= ci_low %}
+                    The price is slightly low, but falls within the expected range.
+                {% elif listing_info['price'] < ci_low %}
+                    The price is lower than the expected range.  The model is confident that it is underpriced.
+                {% endif %}
+            </h3>
+        </div>
+    </div>
+
+
+
+    <!--Draw the figure-->
+    <svg width="500" height="1000">
+        <script type="text/javascript">
+            // get the data
+            var pi = [{{ci_low}}, {{ci_high}}];
+            var mean_pred = {{mean_pred}};
+            var act = {{price}};
+
+            // get the range of all data points to determine scaling
+            var dataset_max = d3.max([pi[1], act])*1.02;
+            var dataset_min = d3.min([pi[0], act])*0.98;
+
+            // compute ranges for cleaner code below
+            var dataset_range = dataset_max - dataset_min;
+            var ci_range = pi[1] - pi[0];
+
+            // determine colors based on actual versus predicted mean/pi
+            if (act > pi[1]) {
+              var ci_color = "rgba(200, 0, 0, 1)";
+              var act_color = "rgba(200, 0, 0, 1)";
+            } else if (act <= pi[1] && act > mean_pred) {
+              var ci_color = "rgba(255, 0, 0, 0.25)";
+              var act_color = "rgba(255, 0, 0, 1)";
+            } else if (act == mean_pred) {
+              var ci_color = "rgba(0, 0, 0, 0.25)";
+              var act_color = "rgba(255, 255, 255, 0.75)";
+            } else if (act < mean_pred && act >= pi[0]) {
+              var ci_color = "rgba(0, 180, 0, .25)";
+              var act_color = "rgba(0, 210, 0, 1)";
+            } else if (act < mean_pred && act < pi[0]) {
+              var ci_color = "rgba(0, 180, 0, 1)";
+              var act_color = "rgba(0, 210, 0, 1)";
+            }
+
+            // compute y-domain and some widths
+            var y_domain = {low: (dataset_min - (0.25*dataset_range)), high: (dataset_max + (0.25*dataset_range))};
+            var pred_mean_height = 0.01 * (y_domain.high - y_domain.low)
+
+            // set the dimensions and margins of the graph
+            var margin = {top: 20, right: 20, bottom: 20, left: 90},
+                width = 400 - margin.left - margin.right,
+                height = 300 - margin.top - margin.bottom;
+
+            // set the scales
+            var yScale = d3.scaleLinear()
+                                 .domain([y_domain.low, y_domain.high])
+                                 .range([height, 0]);
+            var xScale = d3.scaleLinear()
+                                 .domain([0, 2])
+                                 .range([0, width]);
+
+            // set y-axis
+            var yAxis = d3.axisLeft(yScale);
+
+            // draw a svg within the current svg canvas
+            var svg = d3.select("svg")
+                        .append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .attr("x", 150)
+                        .attr("y", 100);
+
+            // add the pi rect to the svg
+            svg.selectAll("rect")
+               .data([1])
+               .enter()
+               .append("rect")
+               .attr("x", xScale(0.2) + margin.left)
+               .attr("y", yScale(pi[1]))
+               .attr("width", xScale(0.4))
+               .attr("height", yScale(0) - yScale(ci_range))
+               .attr("fill", ci_color)
+
+            // add the mean bar
+            svg.append("rect")
+               .attr("x", xScale(0.2) + margin.left)
+               .attr("y", yScale(mean_pred + pred_mean_height/2))
+               .attr("width", xScale(0.4))
+               .attr("height", yScale(0) - yScale(pred_mean_height))
+               .attr("fill", "rgb(0, 0, 0)")
+
+            // add the actual price
+            svg.selectAll("circle")
+               .data([1])
+               .enter()
+              .append("circle")
+              .attr("cx", xScale(0.2) + margin.left + xScale(0.2))
+              .attr("cy", yScale(act))
+              .attr("r", 2*(yScale(0) - yScale(pred_mean_height)))
+              .attr("fill", act_color)
+              .attr("stroke", "black")
+              .attr("stroke-width", yScale(0) - yScale(pred_mean_height))
+
+            svg.append("g")
+               .attr("transform", "translate(" + margin.left + ",0)")
+               .attr("class", "axis")
+               .call(yAxis);
+
+            svg.append("text")
+               .attr("class", "axis")
+               .attr("font-size", "20px")
+               .attr("text-anchor", "middle")
+               .attr("transform","translate(" + (margin.left/3) + "," + (margin.top + (0.4 * height)) + ")rotate(-90)")
+               .text("Monthly rent (USD)")
+
+        </script>
+    </svg>
+
+{% endblock %}
