@@ -56,18 +56,6 @@ def getSQL(user_input, table, select):
     :return:
         sql, str, sql query in string form satisfying requested param ranges
     """
-
-    #debug inputs
-    # user_input = {}
-    # user_input['borough'] = 'Manhattan'
-    # user_input['min_price'] = '1000'
-    # user_input['max_price'] = 'Any'
-    # user_input['beds'] = '>3'
-    # user_input['baths'] = '2'
-    # user_input['sortby'] = 'price'
-    # table = 'all_data'
-    # select = "data_id, address, borough, price, sq_ft, beds, baths, neighborhood"
-
     #start with baseline query imposing expected data range
     sql = "SELECT %s FROM %s WHERE price < 20000 AND sq_ft < 15000" % (select,table)
     #append additional conditions if needed
@@ -96,32 +84,21 @@ def getSQL(user_input, table, select):
 #format data for modeling
 def format_data(df,trans_list,table,engine):
     """
-
-
-
+    Performs standard data formatting.
+    - Drop uninformative features
+    - Convert missing values to 0 and add indicator variables
+    - One-hot-feature encoding for categorical features
+    - Compute interaction terms with neighborhoods
+    
     :params
         df, DataFrame, single listing from the streeteasy database.
         trans_list, list of str, column names for transportation columns in the table
         table, str, name of database table
         engine, sqlalchemy object, connection to sqlite database
     :return:
-
+        df, formatted DataFrame
 
     """
-
-    #for debug - get a random listing from the database
-    #import sqlite3
-    # from sqlalchemy import create_engine
-    # engine = create_engine('sqlite:///streeteasy_db.sqlite')
-    # sql = "SELECT * FROM all_data WHERE data_id == 1869937"
-    # df = pd.read_sql(sql,engine)
-    # trans_list = ["line_A", "line_C", "line_E", "line_B", "line_D", "line_F", "line_M", "line_G", "line_L", "line_J", "line_Z",
-    #               "line_N", "line_Q", "line_R", "line_1", "line_2", "line_3", "line_4", "line_5", "line_6", "line_7", "line_S",
-    #               "LIRR", "PATH"]
-    # table = 'all_data'
-    #debugdebugdebug
-
-
     #convert NaNs in transportation columns to zeros
     for t in trans_list:
         df[t] = df[t].fillna(value=0)
